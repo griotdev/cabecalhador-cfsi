@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cabecalhador-cfsi-v2';
+const CACHE_NAME = 'cabecalhador-cfsi-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

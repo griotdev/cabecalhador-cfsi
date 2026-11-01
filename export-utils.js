@@ -128,28 +128,35 @@ window.renderA4SheetToCanvas = function renderA4SheetToCanvas(
     ctx.restore();
   }
 
-  // 3. Borda Dupla Bordô Oficial (#800000) ao redor da folha A4
-  // Coordenadas exatas extraídas do PDF original:
-  // Retângulo externo: x=24, y=24, w=547.44, h=794.04, espessura=3pt
-  // Espaço branco: 0.72pt
-  // Retângulo interno: x=27.72, y=27.72, w=540.0, h=786.6, espessura=0.72pt
-  ctx.strokeStyle = '#800000';
-  ctx.lineWidth = 3.0;
-  ctx.strokeRect(25.5, 25.5, 544.44, 791.04);
+  // 3. Borda da folha (estilo, cor e distância configuráveis)
+  // O preset "double-official" reproduz exatamente o modelo original do colégio:
+  // retângulo externo de 3pt + retângulo interno de 0.85pt em #800000, a ~8.5mm da beirada.
+  const border = window.getBorderConfig(state);
+  window.drawSheetBorder(ctx, border);
 
-  ctx.strokeStyle = '#800000';
-  ctx.lineWidth = 0.85;
-  ctx.strokeRect(28.08, 28.08, 539.28, 785.88);
+  const inner = window.getBorderInnerRect(state);
+  // Deslocamento vertical do cabeçalho quando a borda fica mais distante da beirada
+  const dyHeader = window.getHeaderShiftPt(state);
+
+  ctx.save();
+  ctx.translate(0, dyHeader);
+
+  // Posição horizontal das logos respeitando a borda interna
+  const leftLogoX = Math.max(24, Math.min(75, inner.left + 7.4));
+  const rightLogoX = Math.min(510, Math.max(455, inner.right - 58.45 - 19.2));
 
   // 4. Logos do Cabeçalho
   // Logo esquerda (AFASJO): x=35.85, y_top=35.45, w=62.25, h=61.5
   if (loadedImages && loadedImages.logoAfasjo) {
-    ctx.drawImage(loadedImages.logoAfasjo, 35.85, 35.45, 62.25, 61.5);
+    ctx.drawImage(loadedImages.logoAfasjo, leftLogoX, 35.45, 62.25, 61.5);
   }
   // Logo direita (CFSI): x=489.4, y_top=41.6, w=58.45, h=57.8
   if (loadedImages && loadedImages.logoCfsi) {
-    ctx.drawImage(loadedImages.logoCfsi, 489.4, 41.6, 58.45, 57.8);
+    ctx.drawImage(loadedImages.logoCfsi, rightLogoX, 41.6, 58.45, 57.8);
   }
+
+  // Largura máxima entre as duas logos para que o texto nunca encoste nelas
+  const maxTextW = Math.max(260, rightLogoX - (leftLogoX + 62.25) - 12);
 
   // 5. Textos Institucionais do Cabeçalho (Centralizados entre as logos, centro X = 297.66 pt)
   const centerX = A4_PT_W / 2;
@@ -162,24 +169,26 @@ window.renderA4SheetToCanvas = function renderA4SheetToCanvas(
   ctx.fillText(
     'ASSOCIAÇÃO FRANCISCANA DE ASSISTÊNCIA SOCIAL SÃO JOSÉ',
     centerX,
-    45.84
+    45.84,
+    maxTextW
   );
 
   // Linha 2: COLÉGIO FRANCISCANO SANTA ISABEL
   ctx.font = 'bold 11.04px Calibri, "Segoe UI", Arial, sans-serif';
   ctx.fillStyle = '#8C3449';
-  ctx.fillText('COLÉGIO FRANCISCANO SANTA ISABEL', centerX, 61.44);
+  ctx.fillText('COLÉGIO FRANCISCANO SANTA ISABEL', centerX, 61.44, maxTextW);
 
   // Linha 3: CNPJ nº 72.303.589/0015-03
   ctx.font = '9.96px Calibri, "Segoe UI", Arial, sans-serif';
   ctx.fillStyle = '#000000';
-  ctx.fillText('CNPJ nº 72.303.589/0015-03', centerX, 75.36);
+  ctx.fillText('CNPJ nº 72.303.589/0015-03', centerX, 75.36, maxTextW);
 
   // Linha 4: Rua Dino Veiga, nº 238 – Centro – CEP 86360-007 – Bandeirantes – PR
   ctx.fillText(
     'Rua Dino Veiga, nº 238 – Centro – CEP 86360-007 – Bandeirantes – PR',
     centerX,
-    89.42
+    89.42,
+    maxTextW
   );
 
   // Linha 5: Fone/Fax: 43 3542-4467  e-mail: secretaria.cfsi@afasjo.org.br
@@ -201,8 +210,10 @@ window.renderA4SheetToCanvas = function renderA4SheetToCanvas(
   ctx.fillRect(emailX, 104.5, emailW, 0.65);
 
   // 6. Linha divisória preta abaixo do cabeçalho (x=33.96, y_top=107.78, w=527.52, h=1.44)
+  const divLeft = Math.max(33.96, inner.left + 5.5);
+  const divRight = Math.min(33.96 + 527.52, inner.right - 5.5);
   ctx.fillStyle = '#00000A';
-  ctx.fillRect(33.96, 107.78, 527.52, 1.44);
+  ctx.fillRect(divLeft, 107.78, Math.max(100, divRight - divLeft), 1.44);
 
   // 7. Bloco ALUNO (A) / TURMA e PROFESSORA / DATA
   ctx.font = '11.04px Arial, Helvetica, sans-serif';
@@ -211,8 +222,8 @@ window.renderA4SheetToCanvas = function renderA4SheetToCanvas(
 
   const studentY = 126.86;
   const teacherY = 145.82;
-  const leftTextX = 63.5;
-  const rightEdgeX = 502.0;
+  const leftTextX = Math.max(63.5, inner.left + 16);
+  const rightEdgeX = Math.min(502.0, inner.right - 16);
 
   // Linha ALUNO(A) + TURMA
   const turmaText = (state.header.turma || 'INFANTIL III').trim().toUpperCase();
@@ -266,13 +277,170 @@ window.renderA4SheetToCanvas = function renderA4SheetToCanvas(
   // Sublinhado sob dia/mês caso preenchidos ou underscores
   ctx.fillText(datePrefix, rightEdgeX - yearW, teacherY);
 
+  ctx.restore(); // fim do deslocamento do cabeçalho
+
   // 8. Linha horizontal inferior opcional (presente no modelo original em y_top = 781.8 pt)
   if (state.header.showBottomLine !== false) {
+    const footLeft = Math.max(51.86, inner.left + 16);
+    const footRight = Math.min(51.86 + 484.54, inner.right - 16);
+    const footY = Math.min(780.45, inner.bottom - 24);
     ctx.fillStyle = '#000000';
-    ctx.fillRect(51.86, 780.45, 484.54, 1.34);
+    ctx.fillRect(footLeft, footY, Math.max(100, footRight - footLeft), 1.34);
   }
 
   ctx.restore();
+};
+
+/**
+ * ============================================================================
+ * Bordas da folha (presets)
+ * ============================================================================
+ */
+const OFFICIAL_BORDER_OFFSET_PT = 24; // Posição da borda no modelo original (~8.5 mm)
+
+window.BORDER_PRESETS = {
+  'double-official': { label: 'Dupla oficial', fixedColor: '#800000', extentPt: 4.5 },
+  'double-custom': { label: 'Dupla', fixedColor: null, extentPt: 4.5 },
+  'single-thin': { label: 'Simples fina', fixedColor: null, extentPt: 1 },
+  'single-thick': { label: 'Simples grossa', fixedColor: null, extentPt: 2.5 },
+  dashed: { label: 'Tracejada', fixedColor: null, extentPt: 1.3 },
+  rounded: { label: 'Arredondada', fixedColor: null, extentPt: 1.6 },
+  none: { label: 'Sem borda', fixedColor: null, extentPt: 0 },
+};
+
+window.DEFAULT_BORDER = { style: 'double-official', color: '#800000', offsetMm: 8.5 };
+
+window.getBorderConfig = function getBorderConfig(state) {
+  const b = (state && state.border) || {};
+  const style = window.BORDER_PRESETS[b.style] ? b.style : window.DEFAULT_BORDER.style;
+  const preset = window.BORDER_PRESETS[style];
+  const offsetMm = Math.max(3, Math.min(20, Number(b.offsetMm ?? window.DEFAULT_BORDER.offsetMm)));
+  return {
+    style,
+    color: preset.fixedColor || b.color || window.DEFAULT_BORDER.color,
+    offsetMm,
+    offsetPt: offsetMm * window.A4_GEOMETRY.mmToPt,
+    extentPt: preset.extentPt,
+  };
+};
+
+/** Deslocamento (pt) aplicado ao cabeçalho/rodapé para acompanhar a distância da borda */
+window.getHeaderShiftPt = function getHeaderShiftPt(state) {
+  const b = window.getBorderConfig(state);
+  return b.offsetPt - OFFICIAL_BORDER_OFFSET_PT;
+};
+
+/** Retângulo interno da borda (borda interna real, em pt) */
+window.getBorderInnerRect = function getBorderInnerRect(state) {
+  const b = window.getBorderConfig(state);
+  const inset = b.offsetPt + b.extentPt;
+  return {
+    left: inset,
+    top: inset,
+    right: A4_PT_W - inset,
+    bottom: A4_PT_H - inset,
+  };
+};
+
+function roundedRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+/** Desenha a borda da folha conforme o preset escolhido */
+window.drawSheetBorder = function drawSheetBorder(ctx, b) {
+  if (b.style === 'none') return;
+  const o = b.offsetPt;
+  const W = A4_PT_W;
+  const H = A4_PT_H;
+
+  // Desenha um retângulo com o traço totalmente "para dentro" a partir de inset
+  const strokeInset = (inset, lw) => {
+    ctx.lineWidth = lw;
+    const h = inset + lw / 2;
+    ctx.strokeRect(h, h, W - 2 * h, H - 2 * h);
+  };
+
+  ctx.save();
+  ctx.strokeStyle = b.color;
+  ctx.setLineDash([]);
+
+  switch (b.style) {
+    case 'double-official':
+    case 'double-custom':
+      strokeInset(o, 3.0);
+      strokeInset(o + 3.65, 0.85);
+      break;
+    case 'single-thin':
+      strokeInset(o, 1);
+      break;
+    case 'single-thick':
+      strokeInset(o, 2.5);
+      break;
+    case 'dashed':
+      ctx.setLineDash([7, 4]);
+      strokeInset(o, 1.3);
+      break;
+    case 'rounded': {
+      const lw = 1.6;
+      const h = o + lw / 2;
+      ctx.lineWidth = lw;
+      roundedRectPath(ctx, h, h, W - 2 * h, H - 2 * h, 14);
+      ctx.stroke();
+      break;
+    }
+    default:
+      break;
+  }
+  ctx.restore();
+};
+
+/** Desenha uma miniatura do preset (usada nos botões de escolha de borda) */
+window.drawBorderThumbnail = function drawBorderThumbnail(canvas, style, color) {
+  const ctx = canvas.getContext('2d');
+  const scale = canvas.width / A4_PT_W;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(scale, scale);
+  const preset = window.BORDER_PRESETS[style];
+  const b = {
+    style,
+    color: preset.fixedColor || color,
+    offsetPt: 40,
+    extentPt: preset.extentPt,
+  };
+  // Engrossa os traços na miniatura para ficarem visíveis
+  const origStrokeRect = CanvasRenderingContext2D.prototype.strokeRect;
+  ctx.strokeRect = (x, y, w, h) => {
+    ctx.lineWidth = Math.max(ctx.lineWidth * 3, 6);
+    origStrokeRect.call(ctx, x, y, w, h);
+  };
+  if (style === 'rounded') {
+    ctx.save();
+    ctx.strokeStyle = b.color;
+    ctx.lineWidth = 8;
+    roundedRectPath(ctx, 44, 44, A4_PT_W - 88, A4_PT_H - 88, 40);
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    window.drawSheetBorder(ctx, b);
+  }
+  // Representação do cabeçalho
+  ctx.fillStyle = '#d4d0d2';
+  ctx.fillRect(90, 80, A4_PT_W - 180, 60);
+  ctx.fillRect(90, 170, A4_PT_W - 180, 14);
+  delete ctx.strokeRect;
 };
 
 /**
@@ -284,13 +452,16 @@ window.getUsableAreaBoundsPt = function getUsableAreaBoundsPt(state) {
   const marginMm = Number(state.marginMm ?? 6);
   const marginPt = marginMm * G.mmToPt;
 
-  const minX = G.borderInnerLeft + marginPt;
-  const maxX = G.borderInnerRight - marginPt;
-  const minY = G.headerEndTop + Math.max(4, marginPt * 0.6);
+  const inner = window.getBorderInnerRect(state);
+  const d = window.getHeaderShiftPt(state);
+
+  const minX = inner.left + marginPt;
+  const maxX = inner.right - marginPt;
+  const minY = G.headerEndTop + d + Math.max(4, marginPt * 0.6);
   const bottomLimit =
     state.header && state.header.showBottomLine !== false
-      ? G.footerLineTop - Math.max(4, marginPt * 0.5)
-      : G.borderInnerBottom - marginPt;
+      ? Math.min(G.footerLineTop, inner.bottom - 24) - Math.max(4, marginPt * 0.5)
+      : inner.bottom - marginPt;
 
   return {
     x: minX,
