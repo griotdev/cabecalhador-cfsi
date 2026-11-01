@@ -10,7 +10,7 @@
   const state = {
     header: {
       teacherRole: 'PROFESSORA:',
-      teacherName: 'DAIANA ICHIHASHI RODRIGUES',
+      teacherName: '',
       turma: 'INFANTIL III',
       dateDay: '',
       dateMonth: '',
@@ -62,7 +62,6 @@
     fileInput: document.getElementById('fileInput'),
     btnPasteImage: document.getElementById('btnPasteImage'),
     btnChooseFile: document.getElementById('btnChooseFile'),
-    btnLoadSample: document.getElementById('btnLoadSample'),
     btnRemoveImage: document.getElementById('btnRemoveImage'),
 
     btnOpenCropModal: document.getElementById('btnOpenCropModal'),
@@ -824,17 +823,6 @@
       }
     });
 
-    // Carregar imagem de exemplo (Dia do Estudante extraída do PDF original)
-    els.btnLoadSample.addEventListener('click', () => {
-      const sampleSrc =
-        (window.EMBEDDED_ASSETS && window.EMBEDDED_ASSETS.sampleActivity) ||
-        './assets/exemplo-atividade.jpg';
-      els.fileNameInput.value = 'Atividade - Dia do Estudante';
-      setActivityImageDataUrl(sampleSrc, {
-        toastMsg: '🎨 Atividade de exemplo carregada! Experimente cortar a linha "NOME:" embaixo.',
-      });
-    });
-
     els.btnRemoveImage.addEventListener('click', () => {
       state.image = null;
       loadedImages.activityImg = null;
@@ -1103,15 +1091,6 @@
     setupPwa();
     initLogos().then(() => {
       fitZoomToWorkspace();
-      // Carrega automaticamente a atividade de exemplo na primeira abertura para demonstrar o funcionamento
-      const sampleSrc =
-        (window.EMBEDDED_ASSETS && window.EMBEDDED_ASSETS.sampleActivity) ||
-        null;
-      if (sampleSrc) {
-        setActivityImageDataUrl(sampleSrc, {
-          cropBottom: 14.5, // Já demonstra o corte da linha duplicada "NOME: ___" do rodapé da figura!
-        });
-      }
     });
   }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cabecalhador-cfsi-v1';
+const CACHE_NAME = 'cabecalhador-cfsi-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,7 +9,6 @@ const ASSETS_TO_CACHE = [
   './manifest.webmanifest',
   './assets/logo-afasjo.png',
   './assets/logo-cfsi.png',
-  './assets/exemplo-atividade.jpg',
   './assets/icon-192.png',
   './assets/icon-512.png'
 ];

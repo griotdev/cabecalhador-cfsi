@@ -234,11 +234,19 @@ window.renderA4SheetToCanvas = function renderA4SheetToCanvas(
 
   // Linha PROFESSORA + DATA
   const roleLabel = (state.header.teacherRole || 'PROFESSORA:').trim();
-  const teacherName = (state.header.teacherName || 'DAIANA ICHIHASHI RODRIGUES')
-    .trim()
-    .toUpperCase();
+  const teacherName = (state.header.teacherName || '').trim().toUpperCase();
   ctx.textAlign = 'left';
-  ctx.fillText(`${roleLabel} ${teacherName}`, leftTextX, teacherY);
+  if (teacherName) {
+    ctx.fillText(`${roleLabel} ${teacherName}`, leftTextX, teacherY);
+  } else {
+    ctx.fillText(`${roleLabel} `, leftTextX, teacherY);
+    const labelW = ctx.measureText(`${roleLabel} `).width;
+    const lineStartX = leftTextX + labelW;
+    const lineEndX = rightEdgeX - 160;
+    if (lineEndX > lineStartX) {
+      ctx.fillRect(lineStartX, teacherY + 1.2, lineEndX - lineStartX, 0.75);
+    }
+  }
 
   // Formatação da Data (ex: _____/_____/2026 ou data preenchida)
   const dayStr = (state.header.dateDay || '').trim();
