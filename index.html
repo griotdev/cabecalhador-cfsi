@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#800000" />
+  <meta name="description" content="Cabeçalhador de Atividades A4 - Colégio Franciscano Santa Isabel" />
+  <title>Cabeçalhador de Atividades A4 — Colégio Franciscano Santa Isabel</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="./assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- Barra Superior -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="./assets/logo-cfsi.png" alt="Logo CFSI" class="brand-logo" id="topBrandLogo" />
+      <div>
+        <div class="brand-title">Cabeçalhador de Atividades — CFSI</div>
+        <div class="brand-subtitle">Colégio Franciscano Santa Isabel • Folha A4 Pronta para PDF e Word</div>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <span class="status-badge" id="offlineBadge" title="Funciona mesmo sem internet após o primeiro acesso">
+        🟢 Pronto (Funciona Offline)
+      </span>
+      <button type="button" class="btn-install-pwa" id="btnInstallPwa" style="display: none;">
+        📌 Criar Atalho no Computador
+      </button>
+      <button type="button" class="btn-install-pwa" id="btnHowToUse" style="background: rgba(255,255,255,0.18); color: #fff;">
+        ❓ Como Usar
+      </button>
+    </div>
+  </header>
+
+  <!-- Layout Principal -->
+  <main class="main-layout">
+    <!-- Painel Lateral de Configuração -->
+    <aside class="sidebar">
+      <div class="sidebar-scroll">
+
+        <!-- PASSO 1: Cabeçalho da Professora -->
+        <section class="card">
+          <div class="card-header">
+            <div class="step-title">
+              <span class="step-badge">1</span>
+              Dados da Professora e Turma
+            </div>
+            <span class="save-indicator" id="saveIndicator">✓ Salvo no PC</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="teacherRole">Título</label>
+              <select id="teacherRole">
+                <option value="PROFESSORA:">PROFESSORA:</option>
+                <option value="PROFESSOR:">PROFESSOR:</option>
+                <option value="PROF.(A):">PROF.(A):</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="turmaInput">Turma / Série</label>
+              <input type="text" id="turmaInput" value="INFANTIL III" placeholder="Ex: INFANTIL III" list="turmasList" />
+              <datalist id="turmasList">
+                <option value="INFANTIL I"></option>
+                <option value="INFANTIL II"></option>
+                <option value="INFANTIL III"></option>
+                <option value="INFANTIL IV"></option>
+                <option value="INFANTIL V"></option>
+                <option value="1º ANO"></option>
+                <option value="2º ANO"></option>
+                <option value="3º ANO"></option>
+                <option value="4º ANO"></option>
+                <option value="5º ANO"></option>
+              </datalist>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="teacherNameInput">Nome da Professora (fica salvo automaticamente)</label>
+            <input type="text" id="teacherNameInput" value="DAIANA ICHIHASHI RODRIGUES" placeholder="Digite o seu nome completo" />
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label style="margin-bottom: 0;">Data da Atividade (deixe dia/mês vazio para preencher à mão)</label>
+              <button type="button" class="btn btn-outline btn-sm" id="btnFillToday" style="padding: 2px 7px; font-size: 0.73rem;">Hoje</button>
+            </div>
+            <div class="form-row-3">
+              <input type="text" id="dateDayInput" maxlength="2" placeholder="Dia (___)" title="Dia (opcional)" />
+              <input type="text" id="dateMonthInput" maxlength="2" placeholder="Mês (___)" title="Mês (opcional)" />
+              <input type="text" id="dateYearInput" maxlength="4" value="2026" placeholder="Ano" title="Ano" />
+            </div>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="showBottomLineCheck" checked />
+            Mostrar linha preta no rodapé da folha
+          </label>
+        </section>
+
+        <!-- PASSO 2: Inserir Imagem da Atividade -->
+        <section class="card">
+          <div class="card-header">
+            <div class="step-title">
+              <span class="step-badge">2</span>
+              Imagem da Atividade
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="btnRemoveImage" style="display: none; color: #b91c1c;">
+              🗑️ Remover
+            </button>
+          </div>
+
+          <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button type="button" class="btn btn-primary btn-full" id="btnPasteImage">
+              📋 Colar Imagem Copiada da Internet (Ctrl + V)
+            </button>
+
+            <div class="btn-grid-2">
+              <button type="button" class="btn btn-secondary" id="btnChooseFile">
+                📂 Escolher do PC
+              </button>
+              <button type="button" class="btn btn-outline" id="btnLoadSample" title="Carrega a atividade do Dia do Estudante para você testar">
+                🎨 Imagem Exemplo
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- PASSO 3: Cortar Bordas, Margens e Posição -->
+        <section class="card" id="step3Card">
+          <div class="card-header">
+            <div class="step-title">
+              <span class="step-badge">3</span>
+              Cortar Bordas e Ajustar na Folha
+            </div>
+          </div>
+
+          <!-- Botão Principal do Cortador Visual -->
+          <button type="button" class="btn btn-crop-highlight btn-full" id="btnOpenCropModal" style="margin-bottom: 8px;">
+            ✂️ Cortar Bordas da Imagem (Tirar Rodapé "Nome", etc.)
+          </button>
+
+          <div class="btn-grid-2" style="margin-bottom: 10px;">
+            <button type="button" class="btn btn-outline btn-sm" id="btnAutoTrimWhite" title="Remove sobras brancas ao redor do desenho automaticamente">
+              ✨ Tirar Sobras Brancas
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnResetCrop" title="Volta a imagem inteira sem cortes">
+              ↺ Desfazer Cortes
+            </button>
+          </div>
+
+          <!-- Sliders rápidos de corte direto -->
+          <div class="crop-sliders-grid">
+            <div class="slider-group" style="margin-bottom: 0;">
+              <div class="slider-header">
+                <span>Cortar Topo</span>
+                <span class="slider-val" id="valCropTop">0%</span>
+              </div>
+              <input type="range" id="sliderCropTop" min="0" max="60" step="0.5" value="0" />
+            </div>
+
+            <div class="slider-group" style="margin-bottom: 0;">
+              <div class="slider-header">
+                <span>Cortar Base (Rodapé)</span>
+                <span class="slider-val" id="valCropBottom">0%</span>
+              </div>
+              <input type="range" id="sliderCropBottom" min="0" max="60" step="0.5" value="0" />
+            </div>
+
+            <div class="slider-group" style="margin-bottom: 0;">
+              <div class="slider-header">
+                <span>Cortar Esquerda</span>
+                <span class="slider-val" id="valCropLeft">0%</span>
+              </div>
+              <input type="range" id="sliderCropLeft" min="0" max="60" step="0.5" value="0" />
+            </div>
+
+            <div class="slider-group" style="margin-bottom: 0;">
+              <div class="slider-header">
+                <span>Cortar Direita</span>
+                <span class="slider-val" id="valCropRight">0%</span>
+              </div>
+              <input type="range" id="sliderCropRight" min="0" max="60" step="0.5" value="0" />
+            </div>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #f1ecee; margin: 12px 0;" />
+
+          <!-- Margens da Folha -->
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Margem Interna ao Redor da Atividade</span>
+              <span class="slider-val" id="valMarginMm">6 mm</span>
+            </div>
+            <input type="range" id="sliderMarginMm" min="0" max="25" step="1" value="6" />
+            <div class="btn-grid-3" style="margin-top: 5px;">
+              <button type="button" class="btn btn-outline btn-sm" data-margin-preset="2">Mínima (2mm)</button>
+              <button type="button" class="btn btn-outline btn-sm" data-margin-preset="6">Padrão (6mm)</button>
+              <button type="button" class="btn btn-outline btn-sm" data-margin-preset="14">Ampla (14mm)</button>
+            </div>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #f1ecee; margin: 12px 0;" />
+
+          <!-- Encaixe e Posicionamento -->
+          <label style="margin-bottom: 6px;">Encaixe Rápido na Folha A4</label>
+          <div class="btn-grid-2" style="margin-bottom: 6px;">
+            <button type="button" class="btn btn-secondary btn-sm" id="btnFitContain" title="Aumenta a imagem ao máximo sem esticar nem achatar o desenho">
+              📏 Encaixar Proporcional
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnFitFill" title="Estica a imagem para ocupar toda a área útil dentro das margens">
+              ↔️ Preencher Toda Área
+            </button>
+          </div>
+          <div class="btn-grid-2" style="margin-bottom: 8px;">
+            <button type="button" class="btn btn-outline btn-sm" id="btnCenterImg">
+              🎯 Centralizar na Folha
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnRotateImg">
+              🔄 Girar 90°
+            </button>
+          </div>
+
+          <label class="checkbox-row" style="margin-bottom: 10px;">
+            <input type="checkbox" id="lockAspectCheck" checked />
+            Manter proporção ao puxar pelos cantos com o mouse
+          </label>
+
+          <!-- Nitidez / Clarear Fundo -->
+          <div style="background: #faf7f8; padding: 10px; border-radius: 8px; border: 1px solid #ece5e7;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="margin-bottom: 0;">Nitidez do Desenho (Opcional)</label>
+              <button type="button" class="btn btn-outline btn-sm" id="btnEnhanceLineArt" style="padding: 2px 8px; font-size: 0.74rem;" title="Deixa o fundo mais branco e os traços mais fortes para colorir">
+                ☀️ Clarear Fundo Cinza
+              </button>
+            </div>
+            <div class="form-row">
+              <div>
+                <div class="slider-header">
+                  <span>Brilho</span>
+                  <span class="slider-val" id="valBrightness">100%</span>
+                </div>
+                <input type="range" id="sliderBrightness" min="70" max="140" step="2" value="100" />
+              </div>
+              <div>
+                <div class="slider-header">
+                  <span>Contraste</span>
+                  <span class="slider-val" id="valContrast">100%</span>
+                </div>
+                <input type="range" id="sliderContrast" min="80" max="180" step="5" value="100" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- PASSO 4 (Rodapé Sempre Visível): Baixar PDF / Word / Imprimir -->
+      <div class="sidebar-footer">
+        <div class="form-group" style="margin-bottom: 2px;">
+          <label for="fileNameInput">Nome para Salvar o Arquivo</label>
+          <input type="text" id="fileNameInput" value="Atividade - Infantil III" placeholder="Ex: Atividade Dia do Estudante" />
+        </div>
+
+        <div class="export-buttons">
+          <button type="button" class="btn btn-pdf" id="btnExportPdf">
+            📄 Baixar PDF
+          </button>
+          <button type="button" class="btn btn-docx" id="btnExportDocx">
+            📘 Baixar Word (.docx)
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-print btn-full" id="btnPrintSheet">
+          🖨️ Imprimir Folha Direto na Impressora
+        </button>
+      </div>
+    </aside>
+
+    <!-- Área Direita: Folha A4 Interativa em Tamanho Real -->
+    <section class="workspace" id="workspaceArea">
+      <div class="workspace-toolbar">
+        <div class="toolbar-hint">
+          <span>💡 <strong>Dica:</strong> Copie qualquer imagem na internet e aperte <span class="kbd">Ctrl</span> + <span class="kbd">V</span>, ou arraste a imagem na folha para mover e esticar!</span>
+        </div>
+        <div class="zoom-controls">
+          <button type="button" class="btn btn-outline btn-sm" id="btnZoomOut" title="Diminuir Zoom">➖</button>
+          <span id="zoomLabel" style="min-width: 48px; text-align: center; font-weight: 700;">100%</span>
+          <button type="button" class="btn btn-outline btn-sm" id="btnZoomIn" title="Aumentar Zoom">➕</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnZoomFit">Ajustar à Tela</button>
+        </div>
+      </div>
+
+      <div class="workspace-canvas-wrap" id="canvasScrollWrap">
+        <!-- Palco A4 Interativo -->
+        <div class="a4-stage" id="a4Stage">
+          <canvas id="a4PreviewCanvas"></canvas>
+
+          <!-- Linha tracejada suave mostrando a margem configurada -->
+          <div class="usable-area-guide" id="usableAreaGuide"></div>
+
+          <!-- Linhas magnéticas de centralização -->
+          <div class="snap-line-v" id="snapLineV"></div>
+          <div class="snap-line-h" id="snapLineH"></div>
+
+          <!-- Área para clicar/arrastar quando ainda não há imagem -->
+          <div class="empty-dropzone" id="emptyDropzone">
+            <div class="empty-dropzone-icon">🖼️</div>
+            <div class="empty-dropzone-title">Clique aqui para escolher a imagem da atividade</div>
+            <div class="empty-dropzone-desc">
+              Ou copie a imagem da internet e aperte <strong>Ctrl + V</strong> no teclado.<br />
+              Você também pode arrastar a imagem direto para cá!
+            </div>
+          </div>
+
+          <!-- Caixa de Seleção Interativa sobre a Imagem na Folha A4 -->
+          <div class="image-transform-box" id="imageTransformBox">
+            <div class="resize-handle handle-nw" data-handle="nw" title="Arraste para redimensionar pelo canto"></div>
+            <div class="resize-handle handle-ne" data-handle="ne" title="Arraste para redimensionar pelo canto"></div>
+            <div class="resize-handle handle-sw" data-handle="sw" title="Arraste para redimensionar pelo canto"></div>
+            <div class="resize-handle handle-se" data-handle="se" title="Arraste para redimensionar pelo canto"></div>
+            <div class="resize-handle handle-n" data-handle="n" title="Arraste para esticar ou diminuir a altura"></div>
+            <div class="resize-handle handle-s" data-handle="s" title="Arraste para esticar ou diminuir a altura"></div>
+            <div class="resize-handle handle-w" data-handle="w" title="Arraste para esticar ou diminuir a largura"></div>
+            <div class="resize-handle handle-e" data-handle="e" title="Arraste para esticar ou diminuir a largura"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal de Recorte Visual de Bordas (Cortar Topo / Base / Laterais) -->
+  <div class="modal-backdrop" id="cropModalBackdrop">
+    <div class="crop-modal">
+      <div class="crop-modal-header">
+        <div class="crop-modal-title">✂️ Cortar Bordas da Imagem da Atividade</div>
+        <button type="button" class="btn btn-sm" id="btnCloseCropModal" style="background: rgba(255,255,255,0.2); color: #fff;">✕ Fechar</button>
+      </div>
+
+      <div class="crop-modal-body">
+        <div class="crop-instructions">
+          Arraste as <strong>4 barras vermelhas</strong> (Topo, Base, Esquerda, Direita) para esconder bordas indesejadas ou o rodapé "NOME: ___" da imagem:
+        </div>
+
+        <div class="crop-stage-container" id="cropStageContainer">
+          <img id="cropModalImg" alt="Imagem para recortar" />
+          <!-- Áreas sombreadas indicando o que será cortado -->
+          <div class="crop-shade" id="cropShadeTop"></div>
+          <div class="crop-shade" id="cropShadeBottom"></div>
+          <div class="crop-shade" id="cropShadeLeft"></div>
+          <div class="crop-shade" id="cropShadeRight"></div>
+
+          <!-- Moldura da parte visível -->
+          <div class="crop-selection-rect" id="cropSelectionRect"></div>
+
+          <!-- Barras arrastáveis para cada um dos 4 lados -->
+          <div class="crop-edge-bar crop-bar-top" data-crop-edge="top" id="cropBarTop" title="Arraste para cortar o topo"></div>
+          <div class="crop-edge-bar crop-bar-bottom" data-crop-edge="bottom" id="cropBarBottom" title="Arraste para cortar a parte de baixo (ex: Nome)"></div>
+          <div class="crop-edge-bar crop-bar-left" data-crop-edge="left" id="cropBarLeft" title="Arraste para cortar o lado esquerdo"></div>
+          <div class="crop-edge-bar crop-bar-right" data-crop-edge="right" id="cropBarRight" title="Arraste para cortar o lado direito"></div>
+        </div>
+      </div>
+
+      <div class="crop-modal-footer">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline btn-sm" id="btnModalResetCrop">↺ Mostrar Imagem Inteira</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btnModalAutoTrim">✨ Cortar Sobras Brancas</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-primary" id="btnApplyCropAndFit">
+            ✓ Pronto! Aplicar Corte e Encaixar na Folha
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Ajuda Rápida / Como Instalar no Computador -->
+  <div class="modal-backdrop" id="helpModalBackdrop">
+    <div class="crop-modal" style="max-width: 600px;">
+      <div class="crop-modal-header">
+        <div class="crop-modal-title">❓ Como Usar e Criar Atalho na Área de Trabalho</div>
+        <button type="button" class="btn btn-sm" id="btnCloseHelpModal" style="background: rgba(255,255,255,0.2); color: #fff;">✕ Fechar</button>
+      </div>
+      <div style="padding: 20px; line-height: 1.55; color: var(--text-main); overflow-y: auto;">
+        <h3 style="color: var(--maroon); margin-bottom: 8px;">1. Como montar a atividade em segundos:</h3>
+        <ol style="padding-left: 20px; margin-bottom: 16px;">
+          <li>Na internet (Google Imagens ou Pinterest), clique com o botão direito na imagem desejada e escolha <strong>"Copiar imagem"</strong>.</li>
+          <li>Volte para cá e aperte <strong>Ctrl + V</strong> (ou clique no botão <strong>"📋 Colar Imagem Copiada"</strong>).</li>
+          <li>Se a imagem já tiver um cabeçalho antigo ou a palavra <em>"NOME: _____"</em> embaixo, clique em <strong>"✂️ Cortar Bordas da Imagem"</strong> ou puxe a barra <strong>"Cortar Base"</strong>.</li>
+          <li>Clique em <strong>"📄 Baixar PDF"</strong> ou <strong>"📘 Baixar Word (.docx)"</strong>. O arquivo vai direto para a sua pasta <strong>Downloads</strong> sem nunca sair do lugar!</li>
+        </ol>
+
+        <h3 style="color: var(--maroon); margin-bottom: 8px;">2. Para as colegas professoras:</h3>
+        <p style="margin-bottom: 16px;">
+          Basta digitar o seu nome em <strong>"Nome da Professora"</strong> e a sua <strong>"Turma"</strong> no Passo 1. O programa guarda esses dados automaticamente no seu computador para todas as próximas semanas!
+        </p>
+
+        <h3 style="color: var(--maroon); margin-bottom: 8px;">3. Como colocar um ícone na Área de Trabalho:</h3>
+        <p>
+          No navegador Chrome ou Edge, clique no botão <strong>"📌 Criar Atalho no Computador"</strong> na barra superior (ou no ícone de computador com uma setinha que aparece no canto direito da barra de endereços) e confirme em <strong>"Instalar"</strong>. Ele ficará na sua Área de Trabalho igual a um programa normal e funcionará mesmo sem internet!
+        </p>
+      </div>
+      <div class="crop-modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-primary" id="btnOkHelpModal">Entendi!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container invisível usado apenas durante a impressão direta (@media print) -->
+  <div id="printOnlyContainer">
+    <img id="printOnlyImg" alt="Folha A4 para impressão" />
+  </div>
+
+  <!-- Notificação Toast -->
+  <div class="toast" id="toastMsg"></div>
+
+  <!-- Scripts Locais (100% Offline) -->
+  <script src="./logos-data.js"></script>
+  <script src="./export-utils.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

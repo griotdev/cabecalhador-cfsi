@@ -1,0 +1,10 @@
+{
+  "name": "cabecalhador-cfsi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cabeçalhador de Atividades A4 (PDF e Word .docx) - Colégio Franciscano Santa Isabel",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  }
+}

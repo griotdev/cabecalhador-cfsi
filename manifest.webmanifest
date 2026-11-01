@@ -1,0 +1,26 @@
+{
+  "name": "Cabeçalhador de Atividades - Colégio Franciscano Santa Isabel",
+  "short_name": "Cabeçalhador CFSI",
+  "description": "Aplicativo simples e rápido para montar atividades escolares em folha A4 com o cabeçalho oficial do Colégio Franciscano Santa Isabel e salvar em PDF ou Word (.docx).",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f1f2",
+  "theme_color": "#800000",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
